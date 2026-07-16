@@ -184,7 +184,7 @@ The dashboard helps stakeholders answer questions such as:
 
 **Paridhi Jain**
 
-B.Tech Student | Data Analytics Enthusiast
+B.Tech Student | Data Science Enthusiast
 
 ---
 
