@@ -1,0 +1,631 @@
+/* ==================================================================
+   INSIGHTFLOW — PREMIUM ENTERPRISE ANALYTICS THEME  (style2.css)
+   ------------------------------------------------------------------
+   Inspired by: Microsoft Fabric, Power BI Premium, Palantir Foundry,
+   Datadog, Grafana Enterprise, Linear, Vercel.
+
+   This file is CSS-ONLY. It re-skins the existing InsightFlow DOM:
+     - Custom classes already emitted by app.py:
+         .sidebar-brand .logo-badge .brand-title .brand-sub
+         .page-title .page-subtitle .section-label
+         .filter-bar
+         .kpi-card .kpi-icon .kpi-value .kpi-label
+         .chart-card .chart-card-title .chart-card-caption
+         .insight-card .insight-title .insight-text
+         .insight-success .insight-info .insight-warning .insight-danger
+     - Native Streamlit widgets, targeted via data-testid / data-baseweb
+       attribute selectors so no Python edits are required.
+
+   NOTE: A handful of items in the brief (top-bar search box, header
+   action buttons) don't exist as DOM elements in the current app.py —
+   CSS can restyle what's there, but can't invent new markup. Everything
+   that *can* be reached from the current structure is covered below.
+   ================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;700;800&display=swap');
+
+/* ------------------------------------------------------------------
+   1. DESIGN TOKENS
+   ------------------------------------------------------------------ */
+:root {
+    /* surfaces */
+    --if-bg:        #090B12;
+    --if-bg-2:      #111522;
+    --if-panel:     #161B2C;
+    --if-card:      #1B2032;
+    --if-border:    rgba(255, 255, 255, 0.06);
+    --if-border-2:  rgba(255, 255, 255, 0.10);
+
+    /* accents */
+    --if-blue:      #4DA3FF;
+    --if-teal:      #00D9B8;
+    --if-purple:    #7C5CFF;
+    --if-warning:   #FFB020;
+    --if-danger:    #FF5C72;
+
+    /* text */
+    --if-text:      #F5F7FA;
+    --if-muted:     #8A93A8;
+
+    /* elevation */
+    --if-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --if-shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45);
+    --if-shadow-glow-blue:   0 0 0 1px rgba(77, 163, 255, 0.18), 0 8px 24px rgba(77, 163, 255, 0.10);
+    --if-shadow-glow-teal:   0 0 0 1px rgba(0, 217, 184, 0.18), 0 8px 24px rgba(0, 217, 184, 0.10);
+    --if-shadow-glow-purple: 0 0 0 1px rgba(124, 92, 255, 0.18), 0 8px 24px rgba(124, 92, 255, 0.10);
+
+    --if-radius-sm: 8px;
+    --if-radius-md: 12px;
+    --if-radius-lg: 14px;
+
+    --if-font-ui:   'Inter', -apple-system, 'Segoe UI', sans-serif;
+    --if-font-head: 'Manrope', 'Inter', sans-serif;
+}
+
+/* ------------------------------------------------------------------
+   2. GLOBAL / RESET
+   ------------------------------------------------------------------ */
+html, body, [class*="css"] {
+    font-family: var(--if-font-ui);
+    -webkit-font-smoothing: antialiased;
+}
+
+.stApp {
+    background:
+        radial-gradient(circle at 10% -10%, rgba(77, 163, 255, 0.06), transparent 40%),
+        radial-gradient(circle at 90% 0%, rgba(124, 92, 255, 0.05), transparent 35%),
+        var(--if-bg);
+    color: var(--if-text);
+}
+
+#MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; height: 0; }
+
+section.main > div.block-container {
+    padding-top: 1.4rem;
+    padding-bottom: 3rem;
+    max-width: 1600px;
+}
+
+/* Fade-in for the whole page body — subtle, one-shot */
+section.main .block-container {
+    animation: if-fade-in 0.35s ease-out;
+}
+@keyframes if-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+::selection { background: rgba(77, 163, 255, 0.35); }
+
+/* ------------------------------------------------------------------
+   3. TYPOGRAPHY
+   ------------------------------------------------------------------ */
+h1, h2, h3, h4 {
+    font-family: var(--if-font-head);
+    color: var(--if-text) !important;
+    letter-spacing: -0.02em;
+}
+
+.page-title {
+    font-family: var(--if-font-head);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--if-text);
+    margin-bottom: 2px;
+    letter-spacing: -0.03em;
+}
+
+.page-subtitle {
+    color: var(--if-muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 1.3rem;
+}
+
+.section-label {
+    font-family: var(--if-font-ui);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--if-blue);
+    margin: 1.8rem 0 0.7rem 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--if-border-2), transparent);
+}
+
+p, span, div, label { color: var(--if-text); }
+.stMarkdown, .stCaption, small { color: var(--if-muted); }
+
+/* ------------------------------------------------------------------
+   4. TOP HEADER  (app-level title block emitted via st.markdown)
+   ------------------------------------------------------------------ */
+/* Targets the inline-styled flex row app.py renders for the app title,
+   since no class is available on it. Falls back gracefully if the
+   markup changes — base app styling above still applies. */
+div[data-testid="stMarkdownContainer"] div[style*="display:flex"][style*="baseline"] {
+    padding: 4px 2px 14px 2px;
+}
+div[data-testid="stMarkdownContainer"] div[style*="display:flex"][style*="baseline"] span[style*="font-size:1.6rem"] {
+    font-family: var(--if-font-head) !important;
+    background: linear-gradient(90deg, var(--if-text) 0%, var(--if-blue) 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em;
+}
+
+/* The st.markdown("---") divider right under the header */
+hr {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, var(--if-border-2), var(--if-border) 60%, transparent) !important;
+    margin: 0.6rem 0 1.4rem 0 !important;
+}
+
+/* ------------------------------------------------------------------
+   5. SIDEBAR
+   ------------------------------------------------------------------ */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--if-bg-2) 0%, var(--if-bg) 100%);
+    border-right: 1px solid var(--if-border);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+}
+section[data-testid="stSidebar"] > div { padding-top: 1.6rem; }
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 2px 4px 18px 4px;
+    margin-bottom: 16px;
+    position: relative;
+}
+.sidebar-brand::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--if-blue), var(--if-purple) 50%, transparent);
+    opacity: 0.5;
+}
+.sidebar-brand .logo-badge {
+    width: 38px; height: 38px;
+    border-radius: var(--if-radius-sm);
+    background: linear-gradient(135deg, var(--if-blue), var(--if-purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 18px rgba(77, 163, 255, 0.35);
+}
+.sidebar-brand .brand-title {
+    font-family: var(--if-font-head);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--if-text);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+.sidebar-brand .brand-sub {
+    font-size: 0.66rem;
+    color: var(--if-muted);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Sidebar nav — turn st.radio into glowing pill navigation */
+section[data-testid="stSidebar"] .stRadio > label { display: none; }
+
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label {
+    position: relative;
+    padding: 10px 14px 10px 18px;
+    border-radius: var(--if-radius-sm);
+    margin-bottom: 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--if-muted);
+    transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    cursor: pointer;
+}
+
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label:hover {
+    background: rgba(77, 163, 255, 0.08);
+    color: var(--if-text);
+    transform: translateX(2px);
+}
+
+/* Hide native radio dot, we draw our own active indicator */
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label > div:first-child {
+    display: none;
+}
+
+/* Active nav item: glowing pill + animated left border */
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label[data-checked="true"],
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked) {
+    background: linear-gradient(90deg, rgba(77, 163, 255, 0.16), rgba(124, 92, 255, 0.06));
+    color: var(--if-text) !important;
+    font-weight: 700;
+}
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label:has(input:checked)::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 12%; bottom: 12%;
+    width: 3px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--if-blue), var(--if-purple));
+    box-shadow: 0 0 10px rgba(77, 163, 255, 0.7);
+    animation: if-pill-in 0.2s ease-out;
+}
+@keyframes if-pill-in {
+    from { transform: scaleY(0.2); opacity: 0; }
+    to   { transform: scaleY(1); opacity: 1; }
+}
+
+section[data-testid="stSidebar"] .stRadio [role="radiogroup"] label p {
+    font-size: 0.88rem !important;
+}
+
+section[data-testid="stSidebar"] .stCaption,
+section[data-testid="stSidebar"] small {
+    color: var(--if-muted) !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.02em;
+}
+
+/* ------------------------------------------------------------------
+   6. FILTER BAR  (premium control panel)
+   ------------------------------------------------------------------ */
+.filter-bar {
+    background: linear-gradient(155deg, var(--if-panel) 0%, var(--if-bg-2) 100%);
+    border: 1px solid var(--if-border);
+    border-radius: var(--if-radius-lg);
+    padding: 14px 20px 6px 20px;
+    margin-bottom: 22px;
+    box-shadow: var(--if-shadow-sm);
+}
+
+.filter-bar .section-label { margin-top: 0; color: var(--if-teal); }
+
+/* Field labels inside filters */
+.filter-bar label p,
+div[data-testid="stMultiSelect"] label p,
+div[data-testid="stDateInput"] label p {
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--if-muted) !important;
+}
+
+/* Multiselect / selectbox shell */
+div[data-baseweb="select"] > div {
+    background-color: var(--if-card) !important;
+    border: 1px solid var(--if-border-2) !important;
+    border-radius: var(--if-radius-sm) !important;
+    min-height: 40px;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+div[data-baseweb="select"]:hover > div {
+    border-color: rgba(77, 163, 255, 0.45) !important;
+    box-shadow: var(--if-shadow-glow-blue);
+}
+div[data-baseweb="select"] input { color: var(--if-text) !important; }
+
+/* Selected filter chips — recolour from default red to the accent set */
+span[data-baseweb="tag"] {
+    background: linear-gradient(135deg, rgba(77, 163, 255, 0.22), rgba(124, 92, 255, 0.18)) !important;
+    border: 1px solid rgba(77, 163, 255, 0.35) !important;
+    color: var(--if-text) !important;
+    border-radius: 6px !important;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+span[data-baseweb="tag"] svg { fill: var(--if-text) !important; opacity: 0.7; }
+
+/* Date input */
+div[data-testid="stDateInput"] input {
+    background-color: var(--if-card) !important;
+    border: 1px solid var(--if-border-2) !important;
+    color: var(--if-text) !important;
+    border-radius: var(--if-radius-sm) !important;
+}
+/* Dropdown menu popover */
+/* The dropdown's scroll container is unstyled inline divs — catch it
+   by the "overflow: auto" it always carries, then force every row dark. */
+div[style*="overflow: auto"],
+div[style*="overflow: auto"] > div {
+    background-color: var(--if-panel) !important;
+}
+
+li[role="option"] {
+    background-color: var(--if-panel) !important;
+    color: var(--if-text) !important;
+}
+li[role="option"]:hover {
+    background-color: rgba(77, 163, 255, 0.16) !important;
+}
+li[role="option"][aria-selected="true"] {
+    background-color: rgba(77, 163, 255, 0.22) !important;
+    color: var(--if-text) !important;
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------------
+   7. KPI CARDS
+   ------------------------------------------------------------------ */
+.kpi-card {
+    position: relative;
+    background: linear-gradient(160deg, rgba(27, 32, 50, 0.92) 0%, rgba(17, 21, 34, 0.92) 100%);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--if-border);
+    border-left: 3px solid var(--accent, var(--if-blue));
+    border-radius: var(--if-radius-md);
+    padding: 18px 20px;
+    height: 118px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: var(--if-shadow-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    overflow: hidden;
+}
+.kpi-card::after {
+    /* soft radial glow in the accent colour, top-right corner */
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: var(--accent, var(--if-blue));
+    opacity: 0.10;
+    filter: blur(18px);
+    pointer-events: none;
+}
+.kpi-card:hover {
+    transform: translateY(-5px);
+    border-color:#5B8DEF;
+    box-shadow: var(--if-shadow-md);
+    border-left-color: var(--accent, var(--if-blue));
+}
+
+.kpi-icon {
+    font-size: 1rem;
+    margin-bottom: 6px;
+    opacity: 0.9;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.kpi-value {
+    font-family: var(--if-font-head);
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--if-text);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-top:8px;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    color: var(--if-muted);
+    margin-top: 4px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------
+   8. CHART CARDS
+   ------------------------------------------------------------------ */
+.chart-card {
+    background: var(--if-card);
+    border: 1px solid var(--if-border);
+    border-radius: var(--if-radius-md);
+    padding: 16px 18px 6px 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--if-shadow-sm);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.chart-card:hover {
+    box-shadow: var(--if-shadow-glow-blue);
+    border-color: rgba(77, 163, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.chart-card-title {
+    font-family: var(--if-font-head);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--if-text);
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+}
+
+.chart-card-caption {
+    font-size: 0.76rem;
+    color: var(--if-muted);
+    margin-bottom: 8px;
+}
+
+/* Plotly's own background must stay transparent so the card shows through */
+.js-plotly-plot .plotly, .plot-container { background: transparent !important; }
+
+/* ------------------------------------------------------------------
+   9. TABS  (animated underline, no default Streamlit look)
+   ------------------------------------------------------------------ */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 4px;
+    border-bottom: 1px solid var(--if-border);
+    background: transparent;
+}
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border-radius: var(--if-radius-sm) var(--if-radius-sm) 0 0;
+    padding: 10px 18px;
+    color: var(--if-muted);
+    font-weight: 600;
+    font-size: 0.86rem;
+    position: relative;
+    transition: color 0.15s ease;
+}
+.stTabs [data-baseweb="tab"]:hover { color: var(--if-text); }
+
+.stTabs [aria-selected="true"] {
+    color: var(--if-text) !important;
+    background: rgba(77, 163, 255, 0.06) !important;
+}
+.stTabs [data-baseweb="tab-highlight"] {
+    background: linear-gradient(90deg, var(--if-blue), var(--if-purple)) !important;
+    height: 2px !important;
+    box-shadow: 0 0 8px rgba(77, 163, 255, 0.6);
+}
+.stTabs [data-baseweb="tab-border"] { background: transparent !important; }
+
+/* ------------------------------------------------------------------
+   10. INSIGHT / RECOMMENDATION CARDS
+   ------------------------------------------------------------------ */
+.insight-card {
+    position: relative;
+    border-radius: var(--if-radius-md);
+    padding: 15px 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--if-border);
+    border-left: 3px solid var(--accent, var(--if-blue));
+    background: linear-gradient(135deg, rgba(27, 32, 50, 0.85), rgba(17, 21, 34, 0.85));
+    box-shadow: var(--if-shadow-sm);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.insight-card:hover {
+    transform: translateX(2px);
+    box-shadow: var(--if-shadow-md);
+}
+.insight-card .insight-title {
+    font-family: var(--if-font-head);
+    font-weight: 700;
+    font-size: 0.92rem;
+    margin-bottom: 4px;
+    color: var(--if-text);
+}
+.insight-card .insight-text {
+    font-size: 0.85rem;
+    color: var(--if-muted);
+    line-height: 1.5;
+}
+.insight-card .insight-text strong { color: var(--if-text); }
+
+.insight-success { --accent: var(--if-teal); }
+.insight-info    { --accent: var(--if-blue); }
+.insight-warning { --accent: var(--if-warning); }
+.insight-danger  { --accent: var(--if-danger); }
+
+/* ------------------------------------------------------------------
+   11. ALERTS  (st.info / st.warning / st.error)
+   ------------------------------------------------------------------ */
+div[data-testid="stAlert"] {
+    background: var(--if-panel) !important;
+    border: 1px solid var(--if-border-2) !important;
+    border-left: 3px solid var(--if-blue) !important;
+    border-radius: var(--if-radius-md) !important;
+    color: var(--if-text) !important;
+}
+
+/* ------------------------------------------------------------------
+   12. GENERIC LAYOUT POLISH  (columns / spacing, no double-boxing)
+   ------------------------------------------------------------------ */
+div[data-testid="stHorizontalBlock"] { gap: 1.1rem; }
+div[data-testid="column"] { padding: 0 2px; }
+
+/* Buttons, if/when used */
+.stButton > button, .stDownloadButton > button {
+    background: linear-gradient(135deg, var(--if-blue), var(--if-purple));
+    border: none;
+    border-radius: var(--if-radius-sm);
+    color: #06070c;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--if-shadow-sm);
+}
+.stButton > button:hover, .stDownloadButton > button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--if-shadow-glow-blue);
+}
+
+/* File uploader (used as a data-loading fallback) */
+div[data-testid="stFileUploader"] section {
+    background: var(--if-card) !important;
+    border: 1px dashed var(--if-border-2) !important;
+    border-radius: var(--if-radius-md) !important;
+}
+
+/* ------------------------------------------------------------------
+   13. SCROLLBAR
+   ------------------------------------------------------------------ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--if-bg); }
+::-webkit-scrollbar-thumb {
+    background: #232a40;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background: #2f3854; }
+
+/* ------------------------------------------------------------------
+   14. RESPONSIVE  (desktop-first: tuned for 1920x1080, degrades gracefully)
+   ------------------------------------------------------------------ */
+@media (max-width: 1440px) {
+    .page-title { font-size: 1.7rem; }
+    .kpi-value  { font-size: 1.5rem; }
+    .kpi-card   { height: 108px; padding: 14px 16px; }
+}
+
+@media (max-width: 1100px) {
+    div[data-testid="stHorizontalBlock"] { flex-wrap: wrap; }
+    .filter-bar { padding: 12px 14px 4px 14px; }
+}
+
+
+/* Calendar popup */
+div[data-baseweb="calendar"] {
+    background: #161b2b !important;
+    color: #ffffff !important;
+    border: 1px solid #2d3655 !important;
+    border-radius: 12px !important;
+}
+
+/* Calendar body */
+div[data-baseweb="calendar"] * {
+    background: #161b2b !important;
+    color: #ffffff !important;
+}
+
+/* Weekday names */
+div[data-baseweb="calendar"] abbr {
+    color: #8ea2c9 !important;
+}
+
+/* Selected day */
+div[aria-selected="true"] {
+    background: #5B8DEF !important;
+    color: white !important;
+    border-radius: 50% !important;
+}
+
+/* Hover day */
+div[data-baseweb="calendar"] td:hover {
+    background: #232b43 !important;
+}

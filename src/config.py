@@ -1,0 +1,6 @@
+PAGE_TITLE = "InsightFlow"
+PAGE_ICON = "📊"
+LAYOUT = "wide"
+
+PRIMARY_COLOR = "#2563EB"
+BACKGROUND_COLOR = "#F8FAFC"
